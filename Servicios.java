@@ -1,0 +1,121 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class Servicios { 
+    private List <Camion> camiones = new ArrayList<>();
+    private List <Paquete> paquetes= new ArrayList<>();
+    
+    private Map<String, Paquete> paquetesPorCodigo = new HashMap<>();
+    private List<Paquete> paquetesConAlimentos = new ArrayList<>();
+    private List<Paquete> paquetesSinAlimentos = new ArrayList<>();
+    private TreeMap<Integer, List<Paquete>> paquetesPorUrgencia = new TreeMap<>();
+    
+    /* Complejidad Temporal del Constructor: O(P + C)
+     Donde P es la cantidad total de paquetes y C la cantidad de camiones.
+     Leer los archivos e insertar en HashMaps/ArrayLists toma tiempo lineal respecto al tamaño de la entrada.
+    La inserción en el TreeMap toma O(log K) por paquete, lo cual sigue siendo eficiente.
+     */
+    public Servicios(String pathCamiones, String pathPaquetes) {
+        cargarPaquetes(pathPaquetes);
+        cargarCamiones(pathCamiones);
+    }
+    private void cargarPaquetes(String path){
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            int total = Integer.parseInt(br.readLine().trim());
+            
+            for (int i = 0; i < total; i++) {
+                String linea = br.readLine();
+                String[] partes = linea.split(";");
+                
+                int id = Integer.parseInt(partes[0]);
+                String codigo = partes[1];
+                int peso = Integer.parseInt(partes[2]);
+                boolean contieneAlimentos = partes[3].equals("1");
+                int urgencia = Integer.parseInt(partes[4]);
+                
+                Paquete p = new Paquete(id, codigo, peso, contieneAlimentos, urgencia);
+                paquetes.add(p);
+
+                paquetesPorCodigo.put(codigo, p);
+                
+                if (contieneAlimentos) {
+                    paquetesConAlimentos.add(p);
+                } else {
+                    paquetesSinAlimentos.add(p);
+                }
+        
+                paquetesPorUrgencia.putIfAbsent(urgencia, new ArrayList<>());
+                paquetesPorUrgencia.get(urgencia).add(p);
+
+            }
+        } catch (IOException e) {
+            System.out.println("Error al leer el archivo de paquetes: " + e.getMessage());
+        }
+    }
+private void cargarCamiones(String path){
+     try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            int total = Integer.parseInt(br.readLine().trim());
+            
+            for (int i = 0; i < total; i++) {
+                String linea = br.readLine();
+                String[] partes = linea.split(";");
+                
+                int id = Integer.parseInt(partes[0]);
+                String patente = partes[1];
+                boolean refrigerado = partes[2].equals("1"); 
+                int capacidad = Integer.parseInt(partes[3]);
+                
+                Camion c = new Camion(id, patente, refrigerado, capacidad);
+                camiones.add(c);
+            }
+        } catch (IOException e) {
+            System.out.println("Error al leer el archivo de camiones: " + e.getMessage());
+        }
+    
+    }
+
+    /*Complejidad: O(1).
+     Al utilizar un HashMap, el acceso al paquete por su clave (código) es directo.*/
+    public Paquete servicio1(String codigoPaquete) {
+       return paquetesPorCodigo.get(codigoPaquete);
+     }
+
+    /*Complejidad: O(1).
+     * Retorna directamente la referencia a la lista precalculada según el booleano.*/
+    public List<Paquete> servicio2(boolean contieneAlimentos) {
+     if (contieneAlimentos) {
+        return paquetesConAlimentos;
+    } else {
+        return paquetesSinAlimentos;
+    }
+    }
+
+    /*Complejidad: O(log K + M)
+    Donde K es la cantidad de niveles de urgencia distintos y M es la cantidad de paquetes devueltos.*/
+    public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) { 
+       List<Paquete> aux= new ArrayList<>();
+       Map<Integer, List<Paquete>> subMapa = paquetesPorUrgencia.subMap(urgenciaMinima, true, urgenciaMaxima, true);
+       for (List<Paquete> listaPorUrgencia : subMapa.values()) {
+        aux.addAll(listaPorUrgencia);
+       }
+       return aux;
+    }
+
+    public List<Camion> getCamiones() {
+        List<Camion> aux= new ArrayList<>();
+        aux.addAll(camiones);
+        return aux;
+    }
+    public List<Paquete> getPaquetes() {
+    List<Paquete> aux= new ArrayList<>();
+        aux.addAll(paquetes);
+        return aux;    
+    }
+
+}
