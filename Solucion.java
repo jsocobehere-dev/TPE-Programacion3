@@ -89,16 +89,17 @@ public class Solucion {
         for (Paquete paquete : copiaPaquetes) {
             boolean asignado = false;
 
-            for (Camion camion : distribucionGreedy) {
-                this.candidatosConsiderados++; 
+            for (int i = 0; i < distribucionGreedy.size() && !asignado; i++) {
+            Camion camion = distribucionGreedy.get(i);
 
-                if (puedeAsignar(paquete, camion)) {
-                    camion.getPaquetes().add(paquete);
-                    camion.setCapacidad_kg(camion.getCapacidad_kg() - paquete.getPeso_kg());
-                    asignado = true;
-                    break;
-                }
+            this.candidatosConsiderados++;
+
+            if (puedeAsignar(paquete, camion)) {
+                camion.getPaquetes().add(paquete);
+                camion.setCapacidad_kg(camion.getCapacidad_kg() - paquete.getPeso_kg());
+                asignado = true;
             }
+        }
 
             if (!asignado) {
                 this.pesoNoAsignadoGreedy += paquete.getPeso_kg();

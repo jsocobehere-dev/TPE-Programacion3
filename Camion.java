@@ -18,24 +18,12 @@ public class Camion{
         return id_camion;
     }
 
-    public void setId_camion(int id_camion) {
-        this.id_camion = id_camion;
-    }
-
     public String getPatente() {
         return patente;
     }
 
-    public void setPatente(String patente) {
-        this.patente = patente;
-    }
-
     public boolean isEsta_refrigerado() {
         return esta_refrigerado;
-    }
-
-    public void setEsta_refrigerado(boolean esta_refrigerado) {
-        this.esta_refrigerado = esta_refrigerado;
     }
 
     public int getCapacidad_kg() {

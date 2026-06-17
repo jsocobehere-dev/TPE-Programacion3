@@ -19,14 +19,14 @@ public class Servicios {
     /* Complejidad Temporal del Constructor: O(P + C)
      Donde P es la cantidad total de paquetes y C la cantidad de camiones.
      Leer los archivos e insertar en HashMaps/ArrayLists toma tiempo lineal respecto al tamaño de la entrada.
-    La inserción en el TreeMap toma O(log K) por paquete, lo cual sigue siendo eficiente.
+    La inserción en el TreeMap toma O(log K) por paquete, sigue siendo eficiente.
      */
-    public Servicios(String pathCamiones, String pathPaquetes) {
-        cargarPaquetes(pathPaquetes);
-        cargarCamiones(pathCamiones);
+    public Servicios(String rutaCamiones, String rutaPaquetes) {
+        cargarPaquetes(rutaPaquetes);
+        cargarCamiones(rutaCamiones);
     }
-    private void cargarPaquetes(String path){
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+    private void cargarPaquetes(String ruta){
+        try (BufferedReader br = new BufferedReader(new FileReader(ruta))) {
             int total = Integer.parseInt(br.readLine().trim());
             
             for (int i = 0; i < total; i++) {
@@ -50,7 +50,10 @@ public class Servicios {
                     paquetesSinAlimentos.add(p);
                 }
         
-                paquetesPorUrgencia.putIfAbsent(urgencia, new ArrayList<>());
+                if (!paquetesPorUrgencia.containsKey(urgencia)) {
+                    paquetesPorUrgencia.put(urgencia, new ArrayList<>());
+                }
+
                 paquetesPorUrgencia.get(urgencia).add(p);
 
             }
@@ -58,27 +61,28 @@ public class Servicios {
             System.out.println("Error al leer el archivo de paquetes: " + e.getMessage());
         }
     }
-private void cargarCamiones(String path){
-     try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            int total = Integer.parseInt(br.readLine().trim());
-            
-            for (int i = 0; i < total; i++) {
-                String linea = br.readLine();
-                String[] partes = linea.split(";");
-                
-                int id = Integer.parseInt(partes[0]);
-                String patente = partes[1];
-                boolean refrigerado = partes[2].equals("1"); 
-                int capacidad = Integer.parseInt(partes[3]);
-                
-                Camion c = new Camion(id, patente, refrigerado, capacidad);
-                camiones.add(c);
-            }
-        } catch (IOException e) {
-            System.out.println("Error al leer el archivo de camiones: " + e.getMessage());
-        }
     
-    }
+    private void cargarCamiones(String ruta){
+        try (BufferedReader br = new BufferedReader(new FileReader(ruta))) {
+                int total = Integer.parseInt(br.readLine().trim());
+                
+                for (int i = 0; i < total; i++) {
+                    String linea = br.readLine();
+                    String[] partes = linea.split(";");
+                    
+                    int id = Integer.parseInt(partes[0]);
+                    String patente = partes[1];
+                    boolean refrigerado = partes[2].equals("1"); 
+                    int capacidad = Integer.parseInt(partes[3]);
+                    
+                    Camion c = new Camion(id, patente, refrigerado, capacidad);
+                    camiones.add(c);
+                }
+            } catch (IOException e) {
+                System.out.println("Error al leer el archivo de camiones: " + e.getMessage());
+            }
+        
+        }
 
     /*Complejidad: O(1).
      Al utilizar un HashMap, el acceso al paquete por su clave (código) es directo.*/

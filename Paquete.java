@@ -17,24 +17,12 @@ public class Paquete {
         return id_paquete;
     }
 
-    public void setId_paquete(int id_paquete) {
-        this.id_paquete = id_paquete;
-    }
-
     public String getCodigo_paquete() {
         return codigo_paquete;
     }
 
-    public void setCodigo_paquete(String codigo_paquete) {
-        this.codigo_paquete = codigo_paquete;
-    }
-
     public int getPeso_kg() {
         return peso_kg;
-    }
-
-    public void setPeso_kg(int peso_kg) {
-        this.peso_kg = peso_kg;
     }
 
     public boolean isContiene_alimentos() {
@@ -52,9 +40,5 @@ public class Paquete {
     public void setNivel_urgencia(int nivel_urgencia) {
         this.nivel_urgencia = nivel_urgencia;
     }
-
-
-
-
 
 }
