@@ -1,11 +1,12 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Solucion {
     private int mejorPesoNoAsignado;
     private List<Camion> mejorDistribucion;
     private int estadosGenerados;
-
+    private HashMap<Camion, Integer> camionesDisponibles; // Para almacenar resultados de subproblemas en Backtracking
     private int pesoNoAsignadoGreedy;
     private List<Camion> distribucionGreedy;
     private int candidatosConsiderados;
@@ -14,7 +15,7 @@ public class Solucion {
         this.mejorPesoNoAsignado = Integer.MAX_VALUE;
         this.mejorDistribucion =  new ArrayList<>();
         this.estadosGenerados = 0;
-
+        this.camionesDisponibles = new HashMap<>();
         this.pesoNoAsignadoGreedy = 0;
         this.distribucionGreedy = new ArrayList<>();
         this.candidatosConsiderados = 0;
@@ -33,7 +34,6 @@ public class Solucion {
         List<Camion> camionesSimulacion = clonarCamiones(camiones);
         this.estadosGenerados = 0;
         this.mejorPesoNoAsignado = Integer.MAX_VALUE;
-
         backtracking(0, paquetes, camionesSimulacion,0);
 
         return this;
@@ -56,13 +56,11 @@ public class Solucion {
         for (Camion camion : camiones) {
             if (puedeAsignar(paqueteActual, camion)) {
                 camion.getPaquetes().add(paqueteActual);
-                camion.setCapacidad_kg(camion.getCapacidad_kg() - paqueteActual.getPeso_kg());
-               
+                camion.setcapacidadUsadaCamion(camion.getcapacidadUsadaCamion() + paqueteActual.getPeso_kg());
                 backtracking(indicePaquete + 1, paquetes, camiones, pesoNoAsignadoAcumulado);
 
                 camion.getPaquetes().remove(camion.getPaquetes().size() - 1);
-    
-                camion.setCapacidad_kg(camion.getCapacidad_kg() + paqueteActual.getPeso_kg());
+                camion.setcapacidadUsadaCamion(camion.getcapacidadUsadaCamion() - paqueteActual.getPeso_kg());
               }
         }
 
@@ -94,16 +92,17 @@ public class Solucion {
 
             this.candidatosConsiderados++;
 
-            if (puedeAsignar(paquete, camion)) {
-                camion.getPaquetes().add(paquete);
-                camion.setCapacidad_kg(camion.getCapacidad_kg() - paquete.getPeso_kg());
-                asignado = true;
+                if (puedeAsignar(paquete, camion)) {
+                    camion.getPaquetes().add(paquete);
+                    camion.setcapacidadUsadaCamion(camion.getcapacidadUsadaCamion() + paquete.getPeso_kg());
+                    actualizarCamionesDisponibles(camion);
+                    asignado = true;
+                }
             }
-        }
-
             if (!asignado) {
                 this.pesoNoAsignadoGreedy += paquete.getPeso_kg();
-            }
+                }
+
         }
     }
 
@@ -123,7 +122,7 @@ public class Solucion {
 
     //COMPARTIDOS
     private boolean puedeAsignar(Paquete p, Camion c) {
-        if (p.getPeso_kg() > c.getCapacidad_kg()) {
+        if ((c.getcapacidadUsadaCamion() + p.getPeso_kg())> c.getCapacidad_kg()) {
             return false;
         }
         if (p.isContiene_alimentos() && !c.isEsta_refrigerado()) {
@@ -132,14 +131,27 @@ public class Solucion {
         return true;
     }
 
+    private void actualizarCamionesDisponibles(Camion camion) {
+        if (camion.getcapacidadUsadaCamion() == camion.getCapacidad_kg()) {
+            camionesDisponibles.remove(camion);
+        }
+    }
+
     private List<Camion> clonarCamiones(List<Camion> originales) {
         List<Camion> copias = new ArrayList<>();
         for (Camion c : originales) {
-            Camion copia = new Camion(c.getId_camion(), c.getPatente(), c.isEsta_refrigerado(), c.getCapacidad_kg());
+            Camion copia = new Camion(c.getId_camion(), c.getPatente(), c.isEsta_refrigerado(), c.getCapacidad_kg(), c.getcapacidadUsadaCamion());
             copia.getPaquetes().addAll(c.getPaquetes());
             copias.add(copia);
         }
         return copias;
+    }
+
+    private void asignarCamiones(List<Camion> camiones) {
+        camionesDisponibles.clear();
+        for (Camion camion : camiones) {
+            camionesDisponibles.put(camion, camion.getcapacidadUsadaCamion());
+        }
     }
 
     public int getMejorPesoNoAsignado() {

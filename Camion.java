@@ -4,13 +4,15 @@ public class Camion{
     private String patente;
     private boolean esta_refrigerado;
     private int capacidad_kg;
+    private int capacidadUsadaCamion;
     private ArrayList<Paquete> paquetes;
     
-    public Camion(int id_camion, String patente, boolean esta_refrigerado, int capacidad_kg) {
+    public Camion(int id_camion, String patente, boolean esta_refrigerado, int capacidad_kg, int capacidadUsadaCamion) {
         this.id_camion = id_camion;
         this.patente = patente;
         this.esta_refrigerado = esta_refrigerado;
         this.capacidad_kg = capacidad_kg;
+        this.capacidadUsadaCamion = 0; 
         this.paquetes = new ArrayList<>();
     }
 
@@ -28,6 +30,12 @@ public class Camion{
 
     public int getCapacidad_kg() {
         return capacidad_kg;
+    }
+    public int getcapacidadUsadaCamion() {
+        return capacidadUsadaCamion;
+    }
+    public void setcapacidadUsadaCamion(int capacidadUsadaCamion) {
+        this.capacidadUsadaCamion = capacidadUsadaCamion;
     }
 
     public void setCapacidad_kg(int capacidad_kg) {

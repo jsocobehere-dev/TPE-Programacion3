@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class Servicios { 
     private List <Camion> camiones = new ArrayList<>();
@@ -14,7 +13,6 @@ public class Servicios {
     private Map<String, Paquete> paquetesPorCodigo = new HashMap<>();
     private List<Paquete> paquetesConAlimentos = new ArrayList<>();
     private List<Paquete> paquetesSinAlimentos = new ArrayList<>();
-    private TreeMap<Integer, List<Paquete>> paquetesPorUrgencia = new TreeMap<>();
     
     /* Complejidad Temporal del Constructor: O(P + C)
      Donde P es la cantidad total de paquetes y C la cantidad de camiones.
@@ -49,12 +47,6 @@ public class Servicios {
                 } else {
                     paquetesSinAlimentos.add(p);
                 }
-        
-                if (!paquetesPorUrgencia.containsKey(urgencia)) {
-                    paquetesPorUrgencia.put(urgencia, new ArrayList<>());
-                }
-
-                paquetesPorUrgencia.get(urgencia).add(p);
 
             }
         } catch (IOException e) {
@@ -74,8 +66,9 @@ public class Servicios {
                     String patente = partes[1];
                     boolean refrigerado = partes[2].equals("1"); 
                     int capacidad = Integer.parseInt(partes[3]);
+                    int capacidadUsadaCamion = 0; 
                     
-                    Camion c = new Camion(id, patente, refrigerado, capacidad);
+                    Camion c = new Camion(id, patente, refrigerado, capacidad, capacidadUsadaCamion);
                     camiones.add(c);
                 }
             } catch (IOException e) {
@@ -100,13 +93,15 @@ public class Servicios {
     }
     }
 
-    /*Complejidad: O(log K + M)
+    /*Complejidad: O(K + M)
     Donde K es la cantidad de niveles de urgencia distintos y M es la cantidad de paquetes devueltos.*/
     public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) { 
        List<Paquete> aux= new ArrayList<>();
-       Map<Integer, List<Paquete>> subMapa = paquetesPorUrgencia.subMap(urgenciaMinima, true, urgenciaMaxima, true);
-       for (List<Paquete> listaPorUrgencia : subMapa.values()) {
-        aux.addAll(listaPorUrgencia);
+       for (int i = 0 ; i < paquetes.size(); i++) {
+            Paquete paquete = paquetes.get(i);
+            if (paquete.getNivel_urgencia() >= urgenciaMinima && paquete.getNivel_urgencia() <= urgenciaMaxima) {
+                aux.add(paquete);
+            }
        }
        return aux;
     }
