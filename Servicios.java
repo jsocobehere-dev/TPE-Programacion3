@@ -93,8 +93,8 @@ public class Servicios {
     }
     }
 
-    /*Complejidad: O(K + M)
-    Donde K es la cantidad de niveles de urgencia distintos y M es la cantidad de paquetes devueltos.*/
+    /*Complejidad: O(P)
+    Donde K es la cantidad total de paquetes.*/
     public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) { 
        List<Paquete> aux= new ArrayList<>();
        for (int i = 0 ; i < paquetes.size(); i++) {
