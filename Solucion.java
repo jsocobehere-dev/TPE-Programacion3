@@ -32,6 +32,7 @@ public class Solucion {
 
     public Solucion ejecutarBacktracking(List<Paquete> paquetes, List<Camion> camiones) {
         List<Camion> camionesSimulacion = clonarCamiones(camiones);
+        asignarCamiones(camionesSimulacion);
         this.estadosGenerados = 0;
         this.mejorPesoNoAsignado = Integer.MAX_VALUE;
         backtracking(0, paquetes, camionesSimulacion,0);
@@ -54,13 +55,11 @@ public class Solucion {
         Paquete paqueteActual = paquetes.get(indicePaquete);
 
         for (Camion camion : camiones) {
-            if (puedeAsignar(paqueteActual, camion)) {
-                camion.getPaquetes().add(paqueteActual);
-                camion.setcapacidadUsadaCamion(camion.getcapacidadUsadaCamion() + paqueteActual.getPeso_kg());
+            if (camion.puedeAgregar(paqueteActual)) {
+                camion.agregarPaquete(paqueteActual);
                 backtracking(indicePaquete + 1, paquetes, camiones, pesoNoAsignadoAcumulado);
 
-                camion.getPaquetes().remove(camion.getPaquetes().size() - 1);
-                camion.setcapacidadUsadaCamion(camion.getcapacidadUsadaCamion() - paqueteActual.getPeso_kg());
+                camion.quitarUltimoPaquete();
               }
         }
 
@@ -71,66 +70,44 @@ public class Solucion {
     /*ESTRATEGIA:se ordenan los paquetes de mayor a menor peso, asi se ubican primero los de mayor peso 
                 para asegurar que tengan su lugar y optimizar el espacio en los camiones.
                 Factibilidad: Cada paquete se asigna al primer camión que tenga espacio libre y cumpla las reglas.
-    COMPLEJIDAD:O(P^2 + P * C). P^2 ya que ordenamos por Selección y P*C un bucle que recorre todos los paquetes (P) y,
-                por cada uno, un bucle interno que recorre los camiones (C) buscando el primero donde encaje.
+    COMPLEJIDAD: O(P log P + P * C)
+            O(P log P) por ordenar los paquetes con sort.
+            O(P * C) porque por cada paquete se pueden recorrer los camiones.
     */
 
     public void ejecutarGreedy(List<Paquete> paquetes, List<Camion> camiones) {
         this.distribucionGreedy = clonarCamiones(camiones);
+        asignarCamiones(this.distribucionGreedy);
+
         this.candidatosConsiderados = 0;
         this.pesoNoAsignadoGreedy = 0;
 
         List<Paquete> copiaPaquetes = new ArrayList<>(paquetes);
 
-        ordenarPaquetes(copiaPaquetes);
+        copiaPaquetes.sort((p1, p2) -> p2.getPeso_kg() - p1.getPeso_kg());
 
         for (Paquete paquete : copiaPaquetes) {
             boolean asignado = false;
 
-            for (int i = 0; i < distribucionGreedy.size() && !asignado; i++) {
-            Camion camion = distribucionGreedy.get(i);
+        for (Camion camion : distribucionGreedy) {
+            if (!asignado) {
+                this.candidatosConsiderados++;
 
-            this.candidatosConsiderados++;
-
-                if (puedeAsignar(paquete, camion)) {
-                    camion.getPaquetes().add(paquete);
-                    camion.setcapacidadUsadaCamion(camion.getcapacidadUsadaCamion() + paquete.getPeso_kg());
+                if (camion.puedeAgregar(paquete)) {
+                    camion.agregarPaquete(paquete);
                     actualizarCamionesDisponibles(camion);
                     asignado = true;
                 }
             }
-            if (!asignado) {
-                this.pesoNoAsignadoGreedy += paquete.getPeso_kg();
-                }
+        }
 
+        if (!asignado) {
+            this.pesoNoAsignadoGreedy += paquete.getPeso_kg();
         }
     }
-
-    private void ordenarPaquetes(List<Paquete>copiaPaquetes) {
-        for (int i = 0; i < copiaPaquetes.size() - 1; i++) {
-            int indiceMaximo = i;
-            for (int j = i + 1; j < copiaPaquetes.size(); j++) {
-                if (copiaPaquetes.get(j).getPeso_kg() > copiaPaquetes.get(indiceMaximo).getPeso_kg()) {
-                    indiceMaximo = j;
-                }
-            }
-            Paquete temp = copiaPaquetes.get(indiceMaximo);
-            copiaPaquetes.set(indiceMaximo, copiaPaquetes.get(i));
-            copiaPaquetes.set(i, temp);
-        }
     }
 
     //COMPARTIDOS
-    private boolean puedeAsignar(Paquete p, Camion c) {
-        if ((c.getcapacidadUsadaCamion() + p.getPeso_kg())> c.getCapacidad_kg()) {
-            return false;
-        }
-        if (p.isContiene_alimentos() && !c.isEsta_refrigerado()) {
-            return false;
-        }
-        return true;
-    }
-
     private void actualizarCamionesDisponibles(Camion camion) {
         if (camion.getcapacidadUsadaCamion() == camion.getCapacidad_kg()) {
             camionesDisponibles.remove(camion);
@@ -139,18 +116,26 @@ public class Solucion {
 
     private List<Camion> clonarCamiones(List<Camion> originales) {
         List<Camion> copias = new ArrayList<>();
+
         for (Camion c : originales) {
-            Camion copia = new Camion(c.getId_camion(), c.getPatente(), c.isEsta_refrigerado(), c.getCapacidad_kg(), c.getcapacidadUsadaCamion());
-            copia.getPaquetes().addAll(c.getPaquetes());
+            Camion copia = new Camion( c.getId_camion(), c.getPatente(), c.isEsta_refrigerado(), c.getCapacidad_kg());
+
+            for (Paquete p : c.getPaquetes()) {
+                copia.agregarPaquete(p);
+            }
+
             copias.add(copia);
         }
+
         return copias;
     }
 
     private void asignarCamiones(List<Camion> camiones) {
         camionesDisponibles.clear();
         for (Camion camion : camiones) {
+            if (camion.getcapacidadUsadaCamion() < camion.getCapacidad_kg()) {
             camionesDisponibles.put(camion, camion.getcapacidadUsadaCamion());
+            }
         }
     }
 

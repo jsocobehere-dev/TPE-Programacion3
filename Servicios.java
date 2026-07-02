@@ -15,14 +15,14 @@ public class Servicios {
     private List<Paquete> paquetesSinAlimentos = new ArrayList<>();
     
     /* Complejidad Temporal del Constructor: O(P + C)
-     Donde P es la cantidad total de paquetes y C la cantidad de camiones.
-     Leer los archivos e insertar en HashMaps/ArrayLists toma tiempo lineal respecto al tamaño de la entrada.
-    La inserción en el TreeMap toma O(log K) por paquete, sigue siendo eficiente.
-     */
+        Donde P es la cantidad total de paquetes y C la cantidad de camiones.
+        Leer los archivos e insertar los elementos en ArrayList y HashMap requiere tiempo lineal respecto al tamaño de la entrada.
+    */
     public Servicios(String rutaCamiones, String rutaPaquetes) {
         cargarPaquetes(rutaPaquetes);
         cargarCamiones(rutaCamiones);
     }
+
     private void cargarPaquetes(String ruta){
         try (BufferedReader br = new BufferedReader(new FileReader(ruta))) {
             int total = Integer.parseInt(br.readLine().trim());
@@ -66,9 +66,8 @@ public class Servicios {
                     String patente = partes[1];
                     boolean refrigerado = partes[2].equals("1"); 
                     int capacidad = Integer.parseInt(partes[3]);
-                    int capacidadUsadaCamion = 0; 
                     
-                    Camion c = new Camion(id, patente, refrigerado, capacidad, capacidadUsadaCamion);
+                    Camion c = new Camion(id, patente, refrigerado, capacidad);
                     camiones.add(c);
                 }
             } catch (IOException e) {
@@ -93,12 +92,13 @@ public class Servicios {
     }
     }
 
-    /*Complejidad: O(P)
-    Donde K es la cantidad total de paquetes.*/
+    /* Complejidad temporal: O(P)
+        Donde P es la cantidad total de paquetes.
+        Se recorre una única vez la lista de paquetes y para cada uno se verifica si su nivel de urgencia pertenece al rango solicitado.
+    */
     public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) { 
        List<Paquete> aux= new ArrayList<>();
-       for (int i = 0 ; i < paquetes.size(); i++) {
-            Paquete paquete = paquetes.get(i);
+       for (Paquete paquete : paquetes) {
             if (paquete.getNivel_urgencia() >= urgenciaMinima && paquete.getNivel_urgencia() <= urgenciaMaxima) {
                 aux.add(paquete);
             }
